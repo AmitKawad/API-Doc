@@ -1,0 +1,640 @@
+openapi: 3.0.2
+info:
+  title: APIs for Expense Tracker
+  version: '1.0.0-3'
+  description: >
+    APIs for Expense to track expenses <br></br>
+    Release Date: 30 Jan 2023
+servers:
+  - url: 'http://localhost:8080'
+paths:
+  /api/expense:
+    post:
+      summary: Create an Expense
+      tags:
+        - Expense 
+      security:
+        - BearerAuth: []
+      description: >-
+        This API can add an expense to the monthly expense tracker
+      requestBody:
+        description: >-
+          API for creating an Expense.<br></br>
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/expense'
+      responses:
+        '202':
+          description: Expense Request Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/202'
+        '400':
+          description: BAD_REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: >
+            * Unauthorized
+            
+            * Note: We are using Azure web services authentication layer so we don't have privilege to add custom error message
+          content:
+            application/json :
+              schema: 
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+        '405':
+          description: Method Not Allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/405'
+        '412':
+          description: Precondition Failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/412'
+        '413':
+          description: Request Entity Too Large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/413'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/503'
+        '504':
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/504' 
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    '202':
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            reference:
+              type: string
+              description: Unique reference ID for request
+              example: 96c5aecc-ed64-4148-aff8-a3a4a570fcf2
+            result:
+              type: array
+              description: Response records
+              items:
+                type: object
+              example: []
+        message:
+          type: string
+          example: Request has been accepted
+        metadata:
+          type: object
+          example: {}
+        status:
+          type: string
+          example: ACCEPTED
+
+    '401': 
+      type: object
+      properties:
+        code: 
+          type: number
+          example: 401
+        message: 
+          type: string
+          example: "IDX10511: Signature validation failed. Keys tried: '[PII is hidden]'. \nkid: '[PII is hidden]'. \nExceptions caught:\n '[PII is hidden]'.\ntoken: '[PII is hidden]'."
+
+    '400':
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          nullable: true
+          properties:
+            result:
+              type: array
+              description: Response records
+              items:
+                type: object
+          example: NULL
+        message:
+          type: string
+          example: '{Resource} creation/updation/deletion failed'
+        metadata:
+          type: object
+          example: {}
+        status:
+          type: string
+          example: FAILED
+        error:
+          type: object
+          properties:
+            type:
+              type: string
+              example: BAD_REQUEST
+            message:
+              type: string
+              example: >-
+                currency: should NOT be longer than 3 characters
+            values:
+              type: array
+              description: Details of invalid fields
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: string
+                  index:
+                    type: integer
+                  id:
+                    type: string
+                  message:
+                    type: string
+              example:
+                - key: currency
+                  value: DOLLARS
+                  index: 0
+                  id: PO-01
+                  message: 'currency: should NOT be longer than 3 characters'
+            
+    '403':
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            reference:
+              type: string
+              description: Unique reference ID for request
+              example: ''
+            result:
+              type: array
+              description: Response records
+              items:
+                type: object
+              example: []
+        message:
+          type: string
+          example: '{Resource} creation/updation/deletion failed'
+        metadata:
+          type: object
+          example: {}
+        status:
+          type: string
+          example: FAILED
+        error:
+          type: object
+          properties:
+            type:
+              type: string
+              example: FORBIDDEN
+            message:
+              type: string
+              example: Access denied
+            values:
+              type: array
+              items:
+                type: object
+              example: []
+            reference:
+              type: string
+              example: 56e2b48a-c74e-4aa0-8bcc-2464351240b0
+    '404':
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          nullable: true
+          example: null
+        message:
+          type: string
+          example: '{Resource} creation/updation/deletion failed'
+        metadata:
+          type: object
+          example: {}
+        status:
+          type: string
+          example: FAILED
+        error:
+          type: object
+          properties:
+            type:
+              type: string
+              example: NOT_FOUND
+            message:
+              type: string
+              example: 'The request resource not found / PO: PO12345678 doesn''t exist'
+            
+    '405':
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            reference:
+              type: string
+              description: Unique reference ID for request
+              example: ''
+            result:
+              type: array
+              description: Response records
+              items:
+                type: object
+              example: []
+        message:
+          type: string
+          example: '{Resource} creation/updation/deletion failed'
+        metadata:
+          type: object
+          example: {}
+        status:
+          type: string
+          example: FAILED
+        error:
+          type: object
+          properties:
+            type:
+              type: string
+              example: METHOD_NOT_ALLOWED
+            message:
+              type: string
+              example: >-
+                The HTTP method in the request was not supported by the
+                resource.
+            values:
+              type: array
+              items:
+                type: object
+              example: []
+            reference:
+              type: string
+              example: 56e2b48a-c74e-4aa0-8bcc-2464351240b0
+    '412':
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            reference:
+              type: string
+              description: Unique reference ID for request
+              example: ''
+            result:
+              type: array
+              description: Response records
+              items:
+                type: object
+              example: []
+        message:
+          type: string
+          example: '{Resource} creation/updation/deletion failed'
+        metadata:
+          type: object
+          example: {}
+        status:
+          type: string
+          example: FAILED
+        error:
+          type: object
+          properties:
+            type:
+              type: string
+              example: PRECONDITION_FAILED
+            message:
+              type: string
+              example: Validations/other precondition failed
+            values:
+              type: array
+              items:
+                type: object
+              example: []
+            reference:
+              type: string
+              example: 56e2b48a-c74e-4aa0-8bcc-2464351240b0
+    '413':
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            reference:
+              type: string
+              description: Unique reference ID for request
+              example: ''
+            result:
+              type: array
+              description: Response records
+              items:
+                type: object
+              example: []
+        message:
+          type: string
+          example: '{Resource} creation/updation/deletion failed'
+        metadata:
+          type: object
+          example: {}
+        status:
+          type: string
+          example: FAILED
+        error:
+          type: object
+          properties:
+            type:
+              type: string
+              example: REQUEST_ENTITY_TOO_LARGE
+            message:
+              type: string
+              example: >-
+                The request entity is larger than the server is willing or able
+                to process
+            values:
+              type: array
+              items:
+                type: object
+              example: []
+            reference:
+              type: string
+              example: 56e2b48a-c74e-4aa0-8bcc-2464351240b0
+    '500':
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            reference:
+              type: string
+              description: Unique reference ID for request
+              example: ''
+            result:
+              type: array
+              description: Response records
+              items:
+                type: object
+              example: []
+        message:
+          type: string
+          example: '{Resource} creation/updation/deletion failed'
+        metadata:
+          type: object
+          example: {}
+        status:
+          type: string
+          example: FAILED
+        error:
+          type: object
+          properties:
+            type:
+              type: string
+              example: INTERNAL_SERVER_ERROR
+            message:
+              type: string
+              example: >-
+                There was an error on the server and the request could not be
+                completed
+            values:
+              type: array
+              items:
+                type: object
+              example: []
+            reference:
+              type: string
+              example: 56e2b48a-c74e-4aa0-8bcc-2464351240b0
+    '503':
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            reference:
+              type: string
+              description: Unique reference ID for request
+              example: ''
+            result:
+              type: array
+              description: Response records
+              items:
+                type: object
+              example: []
+        message:
+          type: string
+          example: '{Resource} creation/updation/deletion failed'
+        metadata:
+          type: object
+          example: {}
+        status:
+          type: string
+          example: FAILED
+        error:
+          type: object
+          properties:
+            type:
+              type: string
+              example: SERVICE_UNAVAILABLE
+            message:
+              type: string
+              example: >-
+                The server is currently unable to handle the request due to a
+                temporary overloading or maintenance of the server
+            values:
+              type: array
+              items:
+                type: object
+              example: []
+            reference:
+              type: string
+              example: 56e2b48a-c74e-4aa0-8bcc-2464351240b0
+    '504':
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          properties:
+            reference:
+              type: string
+              description: Unique reference ID for request
+              example: ''
+            result:
+              type: array
+              description: Response records
+              items:
+                type: object
+              example: []
+        message:
+          type: string
+          example: '{Resource} creation/updation/deletion failed'
+        metadata:
+          type: object
+          example: {}
+        status:
+          type: string
+          example: FAILED
+        error:
+          type: object
+          properties:
+            type:
+              type: string
+              example: GATEWAY_TIMEOUT
+            message:
+              type: string
+              example: Timeout error
+            values:
+              type: array
+              items:
+                type: object
+              example: []
+            reference:
+              type: string
+              example: 56e2b48a-c74e-4aa0-8bcc-2464351240b0
+    expense:
+      type: array
+      items:
+        type: object
+        properties:
+          expenseType:
+            type: string
+            description: >
+             Type of expense
+              * `HE` - House hold expense
+              * `CE` - Corporate expense
+              * `ME` - Miscellaneous expense
+            example: ME
+          expenseId:
+            type: string
+            description: Expense Id
+            minLength: 1
+            maxLength: 50
+            example: Ex12345678
+          currency:
+            type: string
+            description: >
+             Currency
+              * `USD` US Dollar
+              * `INR` Indian Rupee
+            enum:
+              - USD
+              - INR
+            example: USD
+          quantity:
+            type: array
+            description: quantity of goods in expense
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - Item_Qty
+                  description: >
+                    Quantity Type
+                      * `Item_Qty` - Items quantity
+                value:
+                  type: integer
+                  format: int32
+                  minLength: 1
+                  maxLength: 15
+                  description: Quantity value
+            example:
+              - type: Item_Qty
+                value: 20
+          cost:
+            type: array
+            description: Expense Cost
+            items:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - Item_Price
+                    - Total_Cost
+                  description: >
+                    Price Type
+                      * `Item_Price` - Item Price
+                      * `Total_Cost` - Expense cost
+                value:
+                  type: number
+                  format: double
+                  minLength: 1
+                  maxLength: 17
+                  description: Item Price value
+              required:
+                - type
+                - value
+            example:
+              - type: Total_Cost
+                value: 200
+              - type: Item_Price
+                value: 10
+        required:
+          - expenseType
+          - expenseId
+          - quantity
+          - currency
+          - cost
